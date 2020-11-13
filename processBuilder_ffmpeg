@@ -1,0 +1,31 @@
+	public static String getDuration(String cmdPath,String targetFile) throws IOException, InterruptedException {
+		ProcessBuilder processBuilder = new ProcessBuilder();
+		Process process = null;
+		BufferedReader reader;
+		StringBuilder builder = new StringBuilder();
+		String line = null;
+		try {
+			processBuilder.command(cmdPath,"-i",targetFile);
+			process = processBuilder.start();
+		    reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
+		    while ( (line = reader.readLine()) != null) {
+		    	if(line.contains("Duration"))builder.append(line);
+			}
+				String result = builder.toString();
+				result = result.substring(result.indexOf("Duration: ")+10, result.indexOf(","));
+				String [] duration = result.split(":");
+				int summary =  Integer.parseInt(duration[0])*60 + Integer.parseInt(duration[1]) + ((int)Float.parseFloat(duration[2]) > 30 ? 1 : 0);
+				process.getErrorStream().close();
+				process.getInputStream().close();
+				process.getOutputStream().close();
+				return String.valueOf(summary);
+			}finally {
+				reader = null;
+				if(process != null)
+					process.destroy();
+			}
+	}
+  
+  cmd = ffmpeg -i input.ext 2>&1 | find "Duration"   
+  
+  getErrorStream로 받아와야하나보다. input은 안먹음.
